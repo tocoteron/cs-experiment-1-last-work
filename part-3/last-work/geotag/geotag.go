@@ -120,9 +120,9 @@ func WriteGeoTagsToCSV(path string, tags []GeoTag) {
 	for i := 0; i < len(tags); i++ {
 		lines = append(lines, []string{
 			strconv.Itoa(tags[i].ID),
+			tags[i].Time,
 			strconv.FormatFloat(tags[i].Latitude, 'f', -1, 64),
 			strconv.FormatFloat(tags[i].Longitude, 'f', -1, 64),
-			tags[i].Time,
 			tags[i].URL,
 		})
 	}
