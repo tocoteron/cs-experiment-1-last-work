@@ -19,4 +19,12 @@ func main() {
 
 	fmt.Println("Length of geotags", len(geotags))
 	fmt.Println("Length of tags", len(tags))
+
+	geotagsPointerTable := map[int]*geotag.GeoTag{}
+
+	for i := 0; i < len(geotags); i++ {
+		geotagsPointerTable[geotags[i].ID] = &geotags[i]
+	}
+
+	fmt.Println(*geotagsPointerTable[0])
 }
