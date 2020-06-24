@@ -49,13 +49,17 @@ func LoadTags(path string) ([]Tag, error) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.LazyQuotes = true
 
-	lines, err := reader.ReadAll()
+	lines, err := reader.Read()
 	if err != nil {
+		println(lines)
+		println("fuck")
+		panic(err)
 		return nil, err
 	}
 
-	tags, err := UnmarshalTags(lines)
+	tags, err := UnmarshalTags([][]string{lines})
 	if err != nil {
 		return nil, err
 	}
@@ -87,4 +91,21 @@ func GenerateRandomTags(num int, tagLen int) []Tag {
 	}
 
 	return tags
+}
+
+func WriteTagsToCSV(path string, tags []Tag) {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	var lines [][]string
+
+	for i := 0; i < len(tags); i++ {
+		lines = append(lines, []string{strconv.Itoa(tags[i].ID), tags[i].Tag})
+	}
+
+	writer := csv.NewWriter(file)
+	writer.WriteAll(lines)
 }
