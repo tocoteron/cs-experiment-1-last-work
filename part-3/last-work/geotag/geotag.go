@@ -2,6 +2,7 @@ package geotag
 
 import (
 	"encoding/csv"
+	"math/rand"
 	"os"
 	"strconv"
 )
@@ -76,4 +77,33 @@ func LoadGeoTags(path string) ([]GeoTag, error) {
 	}
 
 	return geotags, nil
+}
+
+func GenerateRandomGeoTag(id int, tagLen int) GeoTag {
+	letters := []rune("abcdefghijklmnopqrstuvwxyz")
+
+	b := make([]rune, tagLen)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+
+	geotag := GeoTag{
+		ID:        id,
+		Time:      string(b),
+		Latitude:  rand.Float64(),
+		Longitude: rand.Float64(),
+		URL:       string(b),
+	}
+
+	return geotag
+}
+
+func GenerateRandomGeoTags(num int, tagLen int) []GeoTag {
+	geotags := make([]GeoTag, num)
+
+	for i := 0; i < num; i++ {
+		geotags[i] = GenerateRandomGeoTag(i, tagLen)
+	}
+
+	return geotags
 }
