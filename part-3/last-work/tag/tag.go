@@ -41,7 +41,7 @@ func UnmarshalTags(data [][]string) ([]Tag, error) {
 	return tags, nil
 }
 
-func LoadTags(path string) ([]Tag, error) {
+func ReadTagsFromCSV(path string) ([]Tag, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err

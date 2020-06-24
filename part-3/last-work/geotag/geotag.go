@@ -57,7 +57,7 @@ func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
 	return geotags, nil
 }
 
-func LoadGeoTags(path string) ([]GeoTag, error) {
+func ReadGeoTagsFromCSV(path string) ([]GeoTag, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
