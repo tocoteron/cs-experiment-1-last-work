@@ -49,13 +49,9 @@ func ReadTagsFromCSV(path string) ([]Tag, error) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	reader.LazyQuotes = true
 
 	lines, err := reader.Read()
 	if err != nil {
-		println(lines)
-		println("fuck")
-		panic(err)
 		return nil, err
 	}
 
