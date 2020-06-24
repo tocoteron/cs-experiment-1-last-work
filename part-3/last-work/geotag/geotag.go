@@ -107,3 +107,26 @@ func GenerateRandomGeoTags(num int, tagLen int) []GeoTag {
 
 	return geotags
 }
+
+func WriteGeoTagsToCSV(path string, tags []GeoTag) {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	var lines [][]string
+
+	for i := 0; i < len(tags); i++ {
+		lines = append(lines, []string{
+			strconv.Itoa(tags[i].ID),
+			strconv.FormatFloat(tags[i].Latitude, 'f', -1, 64),
+			strconv.FormatFloat(tags[i].Longitude, 'f', -1, 64),
+			tags[i].Time,
+			tags[i].URL,
+		})
+	}
+
+	writer := csv.NewWriter(file)
+	writer.WriteAll(lines)
+}
