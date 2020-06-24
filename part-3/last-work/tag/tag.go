@@ -2,6 +2,7 @@ package tag
 
 import (
 	"encoding/csv"
+	"math/rand"
 	"os"
 	"strconv"
 )
@@ -60,4 +61,30 @@ func LoadTags(path string) ([]Tag, error) {
 	}
 
 	return tags, nil
+}
+
+func GenerateRandomTag(id int, tagLen int) Tag {
+	letters := []rune("abcdefghijklmnopqrstuvwxyz")
+
+	b := make([]rune, tagLen)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+
+	tag := Tag{
+		ID:  id,
+		Tag: string(b),
+	}
+
+	return tag
+}
+
+func GenerateRandomTags(num int, tagLen int) []Tag {
+	tags := make([]Tag, num)
+
+	for i := 0; i < num; i++ {
+		tags[i] = GenerateRandomTag(i, tagLen)
+	}
+
+	return tags
 }
