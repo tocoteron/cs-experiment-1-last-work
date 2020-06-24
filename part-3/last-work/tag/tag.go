@@ -50,12 +50,12 @@ func ReadTagsFromCSV(path string) ([]Tag, error) {
 
 	reader := csv.NewReader(file)
 
-	lines, err := reader.Read()
+	lines, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
-	tags, err := UnmarshalTags([][]string{lines})
+	tags, err := UnmarshalTags(lines)
 	if err != nil {
 		return nil, err
 	}
