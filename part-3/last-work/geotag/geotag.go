@@ -37,7 +37,7 @@ func UnmarshalGeoTag(data []string) (GeoTag, error) {
 		Time:      data[1],
 		Latitude:  latitude,
 		Longitude: longitude,
-		URL:       data[3],
+		URL:       data[4],
 	}
 
 	return geotag, nil
