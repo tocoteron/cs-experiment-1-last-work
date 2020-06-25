@@ -26,5 +26,22 @@ func main() {
 		geotagsPointerTable[geotags[i].ID] = &geotags[i]
 	}
 
-	fmt.Println(geotagsPointerTable[geotags[0].ID])
+	tagSearchTable := map[string][]*geotag.GeoTag{}
+
+	for i := 0; i < len(tags); i++ {
+		tagSearchTable[tags[i].Tag] = append(tagSearchTable[tags[i].Tag], geotagsPointerTable[tags[i].ID])
+	}
+
+	var searchTag string
+
+	for {
+		fmt.Print("Search: ")
+		fmt.Scan(&searchTag)
+
+		if searchTag == "exit" || searchTag == "quit" {
+			break
+		}
+
+		fmt.Println(tagSearchTable[searchTag])
+	}
 }
