@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <title>ハイパフォーマンス実装の結果</title>
+    </head>
+    <body>
+        {{range $index, $geotag := index . "geotags"}}
+        <div class="geotag" id="{{$geotag.ID}}">
+            <img src="{{$geotag.URL}}">
+            <ul>
+                <li>ID: {{$geotag.ID}}</li>
+                <li>Time: {{$geotag.Time}}</li>
+                <li>Latitude: {{$geotag.Latitude}}</li>
+                <li>Longitude: {{$geotag.Longitude}}</li>
+            </ul>
+        </div>
+        {{end}}
+
+        <p>{{ with $x := index . "reverse" }}
+           {{ call $x "foobar" }} &lt;-- this will call the $x with parameter "foobar"
+           {{ end }}
+        </p>
+    </body>
+</html>
