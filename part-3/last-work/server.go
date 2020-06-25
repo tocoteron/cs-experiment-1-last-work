@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-	geotags, err := geotag.ReadGeoTagsFromCSV("samples/huge_geotag.csv")
+	geotags, err := geotag.ReadGeoTagsFromCSV("samples/geotag.csv")
 	if err != nil {
 		panic(err)
 	}
 
-	tags, err := tag.ReadTagsFromCSV("samples/huge_tag.csv")
+	tags, err := tag.ReadTagsFromCSV("samples/tag.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -26,5 +26,5 @@ func main() {
 		geotagsPointerTable[geotags[i].ID] = &geotags[i]
 	}
 
-	fmt.Println(*geotagsPointerTable[0])
+	fmt.Println(geotagsPointerTable[geotags[0].ID])
 }
