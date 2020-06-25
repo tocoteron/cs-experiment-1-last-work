@@ -29,13 +29,14 @@ git clone https://github.com/tokoroten-lab/cs-experiment-1.git
 
 Move to `$GOPATH/src/cs-experiment-1/part-3/last-work/`.
 
-Run:
+Run(use default port):
 
 ```sh
 go run server.go
 ```
 
-Run(use 80/tcp port)
+Run(use 80 port)
+
 ```sh
 go run server.go -port=80
 ```
