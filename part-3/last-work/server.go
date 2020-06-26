@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
+	"sort"
 	"text/template"
 
 	"github.com/labstack/echo"
@@ -79,6 +81,16 @@ func main() {
 
 	for i := 0; i < len(tags); i++ {
 		tagSearchTable[tags[i].Tag] = append(tagSearchTable[tags[i].Tag], geotagsPointerTable[tags[i].ID])
+	}
+
+	for i := 0; i < len(tags); i++ {
+		targetGeotags := tagSearchTable[tags[i].Tag]
+		sort.Slice(targetGeotags, func(a, b int) bool {
+			return targetGeotags[a].Time > targetGeotags[b].Time
+		})
+
+		last := int(math.Min(float64(len(targetGeotags)), 100))
+		tagSearchTable[tags[i].Tag] = targetGeotags[:last]
 	}
 
 	startWebServer(*port, tagSearchTable)
