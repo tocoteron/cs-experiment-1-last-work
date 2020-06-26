@@ -14,6 +14,12 @@ import (
 	"github.com/labstack/echo"
 )
 
+// GeoTagsPointerTable is mapping ID to GeoTag
+type GeoTagsPointerTable map[int]*geotag.GeoTag
+
+// TagSearchTable is mapping Tag to Geotag
+type TagSearchTable map[string][]*geotag.GeoTag
+
 // TemplateRenderer is a view templates renderer
 type TemplateRenderer struct {
 	templates *template.Template
@@ -24,7 +30,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func startWebServer(port string, tagSearchTable map[string][]*geotag.GeoTag) {
+func startWebServer(port string, tagSearchTable TagSearchTable) {
 	e := echo.New()
 	renderer := &TemplateRenderer{
 		templates: template.Must(template.ParseGlob("view/*.html")),
@@ -43,7 +49,7 @@ func startWebServer(port string, tagSearchTable map[string][]*geotag.GeoTag) {
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
 
-func searchGeoTagsByTag(tagSearchTable map[string][]*geotag.GeoTag, tag string) []geotag.GeoTag {
+func searchGeoTagsByTag(tagSearchTable TagSearchTable, tag string) []geotag.GeoTag {
 	geotagPointers := tagSearchTable[tag]
 	geotags := make([]geotag.GeoTag, len(geotagPointers))
 
@@ -71,13 +77,13 @@ func main() {
 	fmt.Println("Length of geotags", len(geotags))
 	fmt.Println("Length of tags", len(tags))
 
-	geotagsPointerTable := map[int]*geotag.GeoTag{}
+	geotagsPointerTable := GeoTagsPointerTable{}
 
 	for i := 0; i < len(geotags); i++ {
 		geotagsPointerTable[geotags[i].ID] = &geotags[i]
 	}
 
-	tagSearchTable := map[string][]*geotag.GeoTag{}
+	tagSearchTable := TagSearchTable{}
 
 	for i := 0; i < len(tags); i++ {
 		tagSearchTable[tags[i].Tag] = append(tagSearchTable[tags[i].Tag], geotagsPointerTable[tags[i].ID])
