@@ -8,6 +8,8 @@ import (
 
 func AsyncReadCSV(ioreader io.Reader, buffsize int) chan []string {
 	reader := csv.NewReader(ioreader)
+	reader.FieldsPerRecord = -1
+
 	ch := make(chan []string, buffsize)
 
 	go func() {
@@ -18,7 +20,7 @@ func AsyncReadCSV(ioreader io.Reader, buffsize int) chan []string {
 				if err == io.EOF {
 					break
 				}
-				log.Fatal(err)
+				log.Fatal(err.Error())
 			}
 			ch <- record
 		}
