@@ -96,7 +96,7 @@ func main() {
 	port := flag.String("port", "1323", "Port number of web server")
 	flag.Parse()
 
-	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("samples/minimum-geotag.csv", 10500000, 1000)
+	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("data/minimum-geotag.csv", 10500000, 1000)
 	if err != nil {
 		panic(err)
 	}
@@ -111,7 +111,7 @@ func main() {
 		idSearchTable[geotags[i].ID] = &geotags[i]
 	}
 
-	tagSearchTable, err := geotag.ReadTagSearchTableFromCSV("samples/tag-search-table.csv", idSearchTable)
+	tagSearchTable, err := geotag.ReadTagSearchTableFromCSV("data/tag-search-table.csv", idSearchTable)
 	if err != nil {
 		panic(err)
 	}
