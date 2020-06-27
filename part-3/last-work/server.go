@@ -2,6 +2,7 @@ package main
 
 import (
 	"cs-experiment-1/part-3/last-work/geotag"
+	"cs-experiment-1/part-3/last-work/measure"
 	"cs-experiment-1/part-3/last-work/tag"
 	"flag"
 	"fmt"
@@ -64,18 +65,24 @@ func main() {
 	port := flag.String("port", "1323", "Port number of web server")
 	flag.Parse()
 
-	geotags, err := geotag.ReadGeoTagsFromCSV("samples/geotag.csv")
-	if err != nil {
-		panic(err)
-	}
+	var err error
+	var t float64
+	var geotags []geotag.GeoTag
+	var tags []tag.Tag
 
-	tags, err := tag.ReadTagsFromCSV("samples/tag.csv")
-	if err != nil {
-		panic(err)
-	}
+	t, err = measure.MeasureFuncTime(func() error {
+		geotags, err = geotag.ReadGeoTagsFromCSV("samples/geotag.csv", 10500000, 1000)
+		return err
+	})
 
-	fmt.Println("Length of geotags", len(geotags))
-	fmt.Println("Length of tags", len(tags))
+	fmt.Printf("%d, %f\n", len(geotags), t)
+
+	t, err = measure.MeasureFuncTime(func() error {
+		tags, err = tag.ReadTagsFromCSV("samples/tag.csv")
+		return err
+	})
+
+	fmt.Printf("%d, %f\n", len(tags), t)
 
 	geotagsPointerTable := GeoTagsPointerTable{}
 

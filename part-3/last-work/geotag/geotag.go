@@ -2,6 +2,8 @@ package geotag
 
 import (
 	"encoding/csv"
+	"io"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -57,23 +59,43 @@ func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
 	return geotags, nil
 }
 
-func ReadGeoTagsFromCSV(path string) ([]GeoTag, error) {
-	file, err := os.Open(path)
+func asyncReadCSV(ioreader io.Reader, buffsize int) chan []string {
+	reader := csv.NewReader(ioreader)
+	ch := make(chan []string, buffsize)
+
+	go func() {
+		defer close(ch)
+		for {
+			record, err := reader.Read()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.Fatal(err)
+			}
+			ch <- record
+		}
+	}()
+
+	return ch
+}
+
+func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, error) {
+	reader, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer reader.Close()
 
-	reader := csv.NewReader(file)
+	geotags := make([]GeoTag, 0, capacity)
 
-	lines, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
+	for record := range asyncReadCSV(reader, buffsize) {
+		geotag, err := UnmarshalGeoTag(record)
+		if err != nil {
+			return nil, err
+		}
 
-	geotags, err := UnmarshalGeoTags(lines)
-	if err != nil {
-		return nil, err
+		geotags = append(geotags, geotag)
 	}
 
 	return geotags, nil
