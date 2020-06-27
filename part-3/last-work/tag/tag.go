@@ -8,13 +8,13 @@ import (
 
 // Tag is correspondign the db table 'tag'
 type Tag struct {
-	ID  int
+	ID  uint64
 	Tag string
 }
 
 // UnmarshalTag converts []string to Tag
 func UnmarshalTag(data []string) (Tag, error) {
-	id, err := strconv.Atoi(data[0])
+	id, err := strconv.ParseUint(data[0], 10, 64)
 	if err != nil {
 		return Tag{}, err
 	}

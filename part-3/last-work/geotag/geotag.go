@@ -11,7 +11,7 @@ import (
 
 // GeoTag is corresponding the db table 'geotag'
 type GeoTag struct {
-	ID        int
+	ID        uint64
 	Time      int32
 	Latitude  float64
 	Longitude float64
@@ -48,11 +48,6 @@ func unixtime(datetime string, timezone *time.Location) (int32, error) {
 
 // UnmarshalGeoTag converts []string to GeoTag
 func UnmarshalGeoTag(data []string, timezone *time.Location) (GeoTag, error) {
-	id, err := strconv.Atoi(data[0])
-	if err != nil {
-		return GeoTag{}, err
-	}
-
 	datetime, err := unixtime(data[1], timezone)
 	if err != nil {
 		return GeoTag{}, err
@@ -68,6 +63,7 @@ func UnmarshalGeoTag(data []string, timezone *time.Location) (GeoTag, error) {
 		return GeoTag{}, err
 	}
 
+	var id uint64
 	var urlFarmID uint8
 	var urlID1 uint64
 	var urlID2 uint64
@@ -90,6 +86,55 @@ func UnmarshalGeoTag(data []string, timezone *time.Location) (GeoTag, error) {
 		Latitude:  latitude,
 		Longitude: longitude,
 		URLFarmID: urlFarmID,
+		URLID1:    urlID1,
+		URLID2:    urlID2,
+	}
+
+	return geotag, nil
+}
+
+func UnmarshalCompressedGeoTag(data []string) (GeoTag, error) {
+	id, err := strconv.ParseUint(data[0], 10, 64)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	datetime, err := strconv.ParseInt(data[1], 10, 32)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	latitude, err := strconv.ParseFloat(data[2], 64)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	longitude, err := strconv.ParseFloat(data[3], 64)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	urlFarmID, err := strconv.ParseUint(data[4], 10, 8)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	urlID1, err := strconv.ParseUint(data[5], 10, 64)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	urlID2, err := strconv.ParseUint(data[6], 10, 64)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	geotag := GeoTag{
+		ID:        id,
+		Time:      int32(datetime),
+		Latitude:  latitude,
+		Longitude: longitude,
+		URLFarmID: uint8(urlFarmID),
 		URLID1:    urlID1,
 		URLID2:    urlID2,
 	}
@@ -124,6 +169,27 @@ func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, erro
 	return geotags, nil
 }
 
+func ReadCompressedGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, error) {
+	reader, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	geotags := make([]GeoTag, 0, capacity)
+
+	for record := range csvutil.AsyncReadCSV(reader, buffsize) {
+		geotag, err := UnmarshalCompressedGeoTag(record)
+		if err != nil {
+			return nil, err
+		}
+
+		geotags = append(geotags, geotag)
+	}
+
+	return geotags, nil
+}
+
 func WriteGeoTagsToCSV(path string, geotags []GeoTag) error {
 	file, err := os.Create(path)
 	if err != nil {
@@ -134,7 +200,7 @@ func WriteGeoTagsToCSV(path string, geotags []GeoTag) error {
 
 	for i := 0; i < len(geotags); i++ {
 		records[i] = []string{
-			strconv.Itoa(geotags[i].ID),
+			strconv.FormatUint(geotags[i].ID, 10),
 			strconv.Itoa(int(geotags[i].Time)),
 			strconv.FormatFloat(geotags[i].Latitude, 'f', -1, 64),
 			strconv.FormatFloat(geotags[i].Longitude, 'f', -1, 64),
