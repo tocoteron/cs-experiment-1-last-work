@@ -15,10 +15,5 @@
             </ul>
         </div>
         {{end}}
-
-        <p>{{ with $x := index . "reverse" }}
-           {{ call $x "foobar" }} &lt;-- this will call the $x with parameter "foobar"
-           {{ end }}
-        </p>
     </body>
 </html>
