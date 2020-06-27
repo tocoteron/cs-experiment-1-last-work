@@ -62,6 +62,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 	e := echo.New()
 
+	e.HideBanner = true
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
 	renderer := &TemplateRenderer{
@@ -102,7 +103,6 @@ func main() {
 	}
 
 	printMemory()
-
 	fmt.Println(len(geotags), "geotags loaded")
 
 	idSearchTable := geotag.IDSearchTable{}
@@ -117,6 +117,7 @@ func main() {
 	}
 
 	printMemory()
+	fmt.Println(len(tagSearchTable), "tags loaded")
 
 	startWebServer(*port, tagSearchTable)
 }
