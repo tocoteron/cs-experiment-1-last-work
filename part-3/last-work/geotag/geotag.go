@@ -2,7 +2,6 @@ package geotag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -20,15 +19,7 @@ type GeoTag struct {
 // Datetime is raw datetime info
 func (geotag *GeoTag) Datetime() string {
 	t := time.Unix(int64(geotag.Time), 0)
-	return fmt.Sprintf(
-		"%d-%02d-%02d %02d:%02d:%02d",
-		t.Year(),
-		t.Month(),
-		t.Day(),
-		t.Hour(),
-		t.Minute(),
-		t.Second(),
-	)
+	return t.Format("2006-01-02 15:04:05")
 }
 
 func unixtime(datetime string, timezone *time.Location) (int32, error) {
