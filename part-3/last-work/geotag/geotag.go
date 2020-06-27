@@ -20,6 +20,9 @@ type GeoTag struct {
 	URLID2    uint64
 }
 
+// IDSearchTable is mapping ID to GeoTag
+type IDSearchTable map[uint64]*GeoTag
+
 // TagSearchTable is mapping Tag to Geotag
 type TagSearchTable map[string][]*GeoTag
 
@@ -246,4 +249,29 @@ func WriteTagSearchTableToCSV(path string, tagSearchTable TagSearchTable) error 
 	writer.Flush()
 
 	return nil
+}
+
+func ReadTagSearchTableFromCSV(path string, idSearchTable IDSearchTable) (TagSearchTable, error) {
+	reader, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	tagSearchTable := make(TagSearchTable)
+
+	for record := range csvutil.AsyncReadCSV(reader, 1000) {
+		tag := record[0]
+
+		for i := 1; i < len(record); i++ {
+			id, err := strconv.ParseUint(record[i], 10, 64)
+			if err != nil {
+				return TagSearchTable{}, err
+			}
+
+			tagSearchTable[tag] = append(tagSearchTable[tag], idSearchTable[id])
+		}
+	}
+
+	return tagSearchTable, nil
 }

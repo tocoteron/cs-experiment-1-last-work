@@ -2,17 +2,12 @@ package main
 
 import (
 	"cs-experiment-1/part-3/last-work/geotag"
-	"cs-experiment-1/part-3/last-work/measure"
-	"cs-experiment-1/part-3/last-work/tag"
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"runtime"
-	"sort"
 	"text/template"
-	"unsafe"
 
 	"github.com/labstack/echo"
 )
@@ -41,9 +36,6 @@ func printMemory() {
 	fmt.Printf("Sys        %f(GB)\n", toGB(mem.Sys))
 	fmt.Println("-")
 }
-
-// GeoTagsPointerTable is mapping ID to GeoTag
-type GeoTagsPointerTable map[uint64]*geotag.GeoTag
 
 // TemplateRenderer is a view templates renderer
 type TemplateRenderer struct {
@@ -104,64 +96,25 @@ func main() {
 	port := flag.String("port", "1323", "Port number of web server")
 	flag.Parse()
 
-	var err error
-	var t float64
-	var geotags []geotag.GeoTag
-	var tags []tag.Tag
-
-	t, err = measure.MeasureFuncTime(func() error {
-		geotags, err = geotag.ReadCompressedGeoTagsFromCSV("samples/compressed-geotag.csv", 10500000, 1000)
-		return err
-	})
+	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("samples/minimum-geotag.csv", 10500000, 1000)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%d geotags loaded, %f(sec)\n", len(geotags), t)
-	fmt.Println("bytes of geotags[0] is", unsafe.Sizeof(geotags[0]))
-
 	printMemory()
 
-	t, err = measure.MeasureFuncTime(func() error {
-		tags, err = tag.ReadTagsFromCSV("samples/tag.csv", 23000000, 1000)
-		return err
-	})
+	fmt.Println(len(geotags), "geotags loaded")
 
-	fmt.Printf("%d tags loaded, %f(sec)\n", len(tags), t)
-	fmt.Println("bytes of tags[0] is", unsafe.Sizeof(tags[0]))
-
-	printMemory()
-
-	geotagsPointerTable := GeoTagsPointerTable{}
+	idSearchTable := geotag.IDSearchTable{}
 
 	for i := 0; i < len(geotags); i++ {
-		geotagsPointerTable[geotags[i].ID] = &geotags[i]
+		idSearchTable[geotags[i].ID] = &geotags[i]
 	}
 
-	tagSearchTable := geotag.TagSearchTable{}
-
-	for i := 0; i < len(tags); i++ {
-		tagSearchTable[tags[i].Tag] = append(tagSearchTable[tags[i].Tag], geotagsPointerTable[tags[i].ID])
-	}
-
-	for i := 0; i < len(tags); i++ {
-		targetGeotags := tagSearchTable[tags[i].Tag]
-		sort.Slice(targetGeotags, func(a, b int) bool {
-			return targetGeotags[a].Time > targetGeotags[b].Time
-		})
-
-		last := int(math.Min(float64(len(targetGeotags)), 100))
-		tagSearchTable[tags[i].Tag] = targetGeotags[:last]
-	}
-
-	err = geotag.WriteTagSearchTableToCSV("samples/tag-search-table.csv", tagSearchTable)
+	tagSearchTable, err := geotag.ReadTagSearchTableFromCSV("samples/tag-search-table.csv", idSearchTable)
 	if err != nil {
 		panic(err)
 	}
-
-	tags = nil
-
-	runtime.GC()
 
 	printMemory()
 
