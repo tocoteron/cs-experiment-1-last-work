@@ -12,6 +12,7 @@ type Tag struct {
 	Tag string
 }
 
+// UnmarshalTag converts []string to Tag
 func UnmarshalTag(data []string) (Tag, error) {
 	id, err := strconv.Atoi(data[0])
 	if err != nil {
@@ -26,6 +27,7 @@ func UnmarshalTag(data []string) (Tag, error) {
 	return tag, nil
 }
 
+// UnmarshalTags converts [][]string to []Tag by using UnmarshalTag function
 func UnmarshalTags(data [][]string) ([]Tag, error) {
 	var tags []Tag
 
@@ -40,6 +42,7 @@ func UnmarshalTags(data [][]string) ([]Tag, error) {
 	return tags, nil
 }
 
+// ReadTagsFromCSV marshal []Tag from CSV file corresponding the path
 func ReadTagsFromCSV(path string, capacity int, buffsize int) ([]Tag, error) {
 	reader, err := os.Open(path)
 	if err != nil {
