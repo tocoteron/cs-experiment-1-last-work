@@ -2,6 +2,7 @@ package geotag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -13,13 +14,26 @@ type GeoTag struct {
 	Time      int32
 	Latitude  float64
 	Longitude float64
-	URL       string
+	URLFarmID uint8
+	URLID1    uint64
+	URLID2    uint64
 }
 
 // Datetime is raw datetime info
 func (geotag *GeoTag) Datetime() string {
 	t := time.Unix(int64(geotag.Time), 0)
 	return t.Format("2006-01-02 15:04:05")
+}
+
+// URL is raw url info
+func (geotag *GeoTag) URL() string {
+	return fmt.Sprintf(
+		"http://farm%d.static.flickr.com/%d/%d_%010x.jpg",
+		geotag.URLFarmID,
+		geotag.URLID1,
+		geotag.ID,
+		geotag.URLID2,
+	)
 }
 
 func unixtime(datetime string, timezone *time.Location) (int32, error) {
@@ -53,12 +67,30 @@ func UnmarshalGeoTag(data []string, timezone *time.Location) (GeoTag, error) {
 		return GeoTag{}, err
 	}
 
+	var urlFarmID uint8
+	var urlID1 uint64
+	var urlID2 uint64
+
+	_, err = fmt.Sscanf(
+		data[4],
+		"http://farm%d.static.flickr.com/%d/%d_%x.jpg",
+		&urlFarmID,
+		&urlID1,
+		&id,
+		&urlID2,
+	)
+	if err != nil {
+		return GeoTag{}, err
+	}
+
 	geotag := GeoTag{
 		ID:        id,
 		Time:      datetime,
 		Latitude:  latitude,
 		Longitude: longitude,
-		URL:       data[4],
+		URLFarmID: urlFarmID,
+		URLID1:    urlID1,
+		URLID2:    urlID2,
 	}
 
 	return geotag, nil
