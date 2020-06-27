@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"runtime"
+	"runtime/debug"
 	"text/template"
 
 	"github.com/labstack/echo"
@@ -102,6 +103,9 @@ func main() {
 		panic(err)
 	}
 
+	runtime.GC()
+	debug.FreeOSMemory()
+
 	printMemory()
 	fmt.Println(len(geotags), "geotags loaded")
 
@@ -115,6 +119,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	runtime.GC()
+	debug.FreeOSMemory()
 
 	printMemory()
 	fmt.Println(len(tagSearchTable), "tags loaded")
