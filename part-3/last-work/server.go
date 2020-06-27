@@ -9,17 +9,41 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"runtime"
 	"sort"
 	"text/template"
+	"unsafe"
 
 	"github.com/labstack/echo"
 )
 
-// GeoTagsPointerTable is mapping ID to GeoTag
-type GeoTagsPointerTable map[int]*geotag.GeoTag
+var mem runtime.MemStats
 
-// TagSearchTable is mapping Tag to Geotag
-type TagSearchTable map[string][]*geotag.GeoTag
+func toKB(bytes uint64) float64 {
+	return float64(bytes) / 1024
+}
+
+func toMB(bytes uint64) float64 {
+	return toKB(bytes) / 1024
+}
+
+func toGB(bytes uint64) float64 {
+	return toMB(bytes) / 1024
+}
+
+func printMemory() {
+	runtime.ReadMemStats(&mem)
+	fmt.Println("-")
+	fmt.Printf("Alloc      %f(GB)\n", toGB(mem.Alloc))
+	fmt.Printf("HeapAlloc  %f(GB)\n", toGB(mem.HeapAlloc))
+	fmt.Printf("TotalAlloc %f(GB)\n", toGB(mem.TotalAlloc))
+	fmt.Printf("HeapSys    %f(GB)\n", toGB(mem.HeapSys))
+	fmt.Printf("Sys        %f(GB)\n", toGB(mem.Sys))
+	fmt.Println("-")
+}
+
+// GeoTagsPointerTable is mapping ID to GeoTag
+type GeoTagsPointerTable map[uint64]*geotag.GeoTag
 
 // TemplateRenderer is a view templates renderer
 type TemplateRenderer struct {
@@ -31,8 +55,23 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func startWebServer(port string, tagSearchTable TagSearchTable) {
+func customHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+	errorPage := fmt.Sprintf("%d.html", code)
+	if err := c.File(errorPage); err != nil {
+		c.Logger().Error(err)
+	}
+	c.Logger().Error(err)
+}
+
+func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 	e := echo.New()
+
+	e.HTTPErrorHandler = customHTTPErrorHandler
+
 	renderer := &TemplateRenderer{
 		templates: template.Must(template.ParseGlob("view/*.html")),
 	}
@@ -50,7 +89,7 @@ func startWebServer(port string, tagSearchTable TagSearchTable) {
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
 
-func searchGeoTagsByTag(tagSearchTable TagSearchTable, tag string) []geotag.GeoTag {
+func searchGeoTagsByTag(tagSearchTable geotag.TagSearchTable, tag string) []geotag.GeoTag {
 	geotagPointers := tagSearchTable[tag]
 	geotags := make([]geotag.GeoTag, len(geotagPointers))
 
@@ -71,18 +110,27 @@ func main() {
 	var tags []tag.Tag
 
 	t, err = measure.MeasureFuncTime(func() error {
-		geotags, err = geotag.ReadGeoTagsFromCSV("samples/geotag.csv", 10500000, 1000)
+		geotags, err = geotag.ReadCompressedGeoTagsFromCSV("samples/compressed-geotag.csv", 10500000, 1000)
 		return err
 	})
+	if err != nil {
+		panic(err)
+	}
 
-	fmt.Printf("%d, %f\n", len(geotags), t)
+	fmt.Printf("%d geotags loaded, %f(sec)\n", len(geotags), t)
+	fmt.Println("bytes of geotags[0] is", unsafe.Sizeof(geotags[0]))
+
+	printMemory()
 
 	t, err = measure.MeasureFuncTime(func() error {
 		tags, err = tag.ReadTagsFromCSV("samples/tag.csv", 23000000, 1000)
 		return err
 	})
 
-	fmt.Printf("%d, %f\n", len(tags), t)
+	fmt.Printf("%d tags loaded, %f(sec)\n", len(tags), t)
+	fmt.Println("bytes of tags[0] is", unsafe.Sizeof(tags[0]))
+
+	printMemory()
 
 	geotagsPointerTable := GeoTagsPointerTable{}
 
@@ -90,7 +138,7 @@ func main() {
 		geotagsPointerTable[geotags[i].ID] = &geotags[i]
 	}
 
-	tagSearchTable := TagSearchTable{}
+	tagSearchTable := geotag.TagSearchTable{}
 
 	for i := 0; i < len(tags); i++ {
 		tagSearchTable[tags[i].Tag] = append(tagSearchTable[tags[i].Tag], geotagsPointerTable[tags[i].ID])
@@ -105,6 +153,17 @@ func main() {
 		last := int(math.Min(float64(len(targetGeotags)), 100))
 		tagSearchTable[tags[i].Tag] = targetGeotags[:last]
 	}
+
+	err = geotag.WriteTagSearchTableToCSV("samples/tag-search-table.csv", tagSearchTable)
+	if err != nil {
+		panic(err)
+	}
+
+	tags = nil
+
+	runtime.GC()
+
+	printMemory()
 
 	startWebServer(*port, tagSearchTable)
 }

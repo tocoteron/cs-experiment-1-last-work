@@ -20,6 +20,9 @@ type GeoTag struct {
 	URLID2    uint64
 }
 
+// TagSearchTable is mapping Tag to Geotag
+type TagSearchTable map[string][]*GeoTag
+
 // Datetime is raw datetime info
 func (geotag *GeoTag) Datetime() string {
 	t := time.Unix(int64(geotag.Time), 0)
@@ -209,6 +212,34 @@ func WriteGeoTagsToCSV(path string, geotags []GeoTag) error {
 			strconv.FormatUint(uint64(geotags[i].URLID2), 10),
 		}
 	}
+
+	writer := csv.NewWriter(file)
+	writer.WriteAll(records)
+	writer.Flush()
+
+	return nil
+}
+
+func WriteTagSearchTableToCSV(path string, tagSearchTable TagSearchTable) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	records := make([][]string, len(tagSearchTable))
+
+	i := 0
+	for k, geotagPointers := range tagSearchTable {
+		records[i] = []string{k}
+
+		for _, geotagPointer := range geotagPointers {
+			records[i] = append(records[i], strconv.FormatUint(geotagPointer.ID, 10))
+		}
+
+		i++
+	}
+
+	fmt.Println(len(records[0]))
 
 	writer := csv.NewWriter(file)
 	writer.WriteAll(records)
