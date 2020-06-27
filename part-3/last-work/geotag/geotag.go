@@ -15,6 +15,7 @@ type GeoTag struct {
 	URL       string
 }
 
+// UnmarshalGeoTag converts []string to GeoTag
 func UnmarshalGeoTag(data []string) (GeoTag, error) {
 	id, err := strconv.Atoi(data[0])
 	if err != nil {
@@ -42,6 +43,7 @@ func UnmarshalGeoTag(data []string) (GeoTag, error) {
 	return geotag, nil
 }
 
+// UnmarshalGeoTags converts [][]string to []GeoTag by using UnmarshalGeoTag function
 func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
 	var geotags []GeoTag
 
@@ -56,6 +58,7 @@ func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
 	return geotags, nil
 }
 
+// ReadGeoTagsFromCSV marshal []GeoTag from CSV file coressponding the path
 func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, error) {
 	reader, err := os.Open(path)
 	if err != nil {
