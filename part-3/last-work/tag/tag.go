@@ -2,8 +2,6 @@ package tag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
-	"encoding/csv"
-	"math/rand"
 	"os"
 	"strconv"
 )
@@ -61,47 +59,4 @@ func ReadTagsFromCSV(path string, capacity int, buffsize int) ([]Tag, error) {
 	}
 
 	return tags, nil
-}
-
-func GenerateRandomTag(id int, tagLen int) Tag {
-	letters := []rune("abcdefghijklmnopqrstuvwxyz")
-
-	b := make([]rune, tagLen)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-
-	tag := Tag{
-		ID:  id,
-		Tag: string(b),
-	}
-
-	return tag
-}
-
-func GenerateRandomTags(num int, tagLen int) []Tag {
-	tags := make([]Tag, num)
-
-	for i := 0; i < num; i++ {
-		tags[i] = GenerateRandomTag(i, tagLen)
-	}
-
-	return tags
-}
-
-func WriteTagsToCSV(path string, tags []Tag) {
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	var lines [][]string
-
-	for i := 0; i < len(tags); i++ {
-		lines = append(lines, []string{strconv.Itoa(tags[i].ID), tags[i].Tag})
-	}
-
-	writer := csv.NewWriter(file)
-	writer.WriteAll(lines)
 }

@@ -2,8 +2,6 @@ package geotag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
-	"encoding/csv"
-	"math/rand"
 	"os"
 	"strconv"
 )
@@ -77,56 +75,4 @@ func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, erro
 	}
 
 	return geotags, nil
-}
-
-func GenerateRandomGeoTag(id int, tagLen int) GeoTag {
-	letters := []rune("abcdefghijklmnopqrstuvwxyz")
-
-	b := make([]rune, tagLen)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-
-	geotag := GeoTag{
-		ID:        id,
-		Time:      string(b),
-		Latitude:  rand.Float64(),
-		Longitude: rand.Float64(),
-		URL:       string(b),
-	}
-
-	return geotag
-}
-
-func GenerateRandomGeoTags(num int, tagLen int) []GeoTag {
-	geotags := make([]GeoTag, num)
-
-	for i := 0; i < num; i++ {
-		geotags[i] = GenerateRandomGeoTag(i, tagLen)
-	}
-
-	return geotags
-}
-
-func WriteGeoTagsToCSV(path string, tags []GeoTag) {
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	var lines [][]string
-
-	for i := 0; i < len(tags); i++ {
-		lines = append(lines, []string{
-			strconv.Itoa(tags[i].ID),
-			tags[i].Time,
-			strconv.FormatFloat(tags[i].Latitude, 'f', -1, 64),
-			strconv.FormatFloat(tags[i].Longitude, 'f', -1, 64),
-			tags[i].URL,
-		})
-	}
-
-	writer := csv.NewWriter(file)
-	writer.WriteAll(lines)
 }
