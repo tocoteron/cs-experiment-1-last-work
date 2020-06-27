@@ -2,6 +2,7 @@ package geotag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
+	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
@@ -121,4 +122,31 @@ func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, erro
 	}
 
 	return geotags, nil
+}
+
+func WriteGeoTagsToCSV(path string, geotags []GeoTag) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	records := make([][]string, len(geotags))
+
+	for i := 0; i < len(geotags); i++ {
+		records[i] = []string{
+			strconv.Itoa(geotags[i].ID),
+			strconv.Itoa(int(geotags[i].Time)),
+			strconv.FormatFloat(geotags[i].Latitude, 'f', -1, 64),
+			strconv.FormatFloat(geotags[i].Longitude, 'f', -1, 64),
+			strconv.FormatUint(uint64(geotags[i].URLFarmID), 10),
+			strconv.FormatUint(uint64(geotags[i].URLID1), 10),
+			strconv.FormatUint(uint64(geotags[i].URLID2), 10),
+		}
+	}
+
+	writer := csv.NewWriter(file)
+	writer.WriteAll(records)
+	writer.Flush()
+
+	return nil
 }
