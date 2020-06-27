@@ -58,7 +58,7 @@ func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
 	return geotags, nil
 }
 
-// ReadGeoTagsFromCSV marshal []GeoTag from CSV file coressponding the path
+// ReadGeoTagsFromCSV marshal []GeoTag from CSV file corresponding the path
 func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, error) {
 	reader, err := os.Open(path)
 	if err != nil {
