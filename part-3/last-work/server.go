@@ -78,7 +78,7 @@ func main() {
 	fmt.Printf("%d, %f\n", len(geotags), t)
 
 	t, err = measure.MeasureFuncTime(func() error {
-		tags, err = tag.ReadTagsFromCSV("samples/tag.csv")
+		tags, err = tag.ReadTagsFromCSV("samples/tag.csv", 23000000, 1000)
 		return err
 	})
 

@@ -1,6 +1,7 @@
 package tag
 
 import (
+	"cs-experiment-1/part-3/last-work/csvutil"
 	"encoding/csv"
 	"math/rand"
 	"os"
@@ -41,23 +42,22 @@ func UnmarshalTags(data [][]string) ([]Tag, error) {
 	return tags, nil
 }
 
-func ReadTagsFromCSV(path string) ([]Tag, error) {
-	file, err := os.Open(path)
+func ReadTagsFromCSV(path string, capacity int, buffsize int) ([]Tag, error) {
+	reader, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer reader.Close()
 
-	reader := csv.NewReader(file)
+	tags := make([]Tag, 0, capacity)
 
-	lines, err := reader.ReadAll()
-	if err != nil {
-		return nil, err
-	}
+	for record := range csvutil.AsyncReadCSV(reader, buffsize) {
+		tag, err := UnmarshalTag(record)
+		if err != nil {
+			return nil, err
+		}
 
-	tags, err := UnmarshalTags(lines)
-	if err != nil {
-		return nil, err
+		tags = append(tags, tag)
 	}
 
 	return tags, nil
