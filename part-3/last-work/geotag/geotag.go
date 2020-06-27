@@ -2,22 +2,52 @@ package geotag
 
 import (
 	"cs-experiment-1/part-3/last-work/csvutil"
+	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 // GeoTag is corresponding the db table 'geotag'
 type GeoTag struct {
 	ID        int
-	Time      string
+	Time      int32
 	Latitude  float64
 	Longitude float64
 	URL       string
 }
 
+// Datetime is raw datetime info
+func (geotag *GeoTag) Datetime() string {
+	t := time.Unix(int64(geotag.Time), 0)
+	return fmt.Sprintf(
+		"%d-%02d-%02d %02d:%02d:%02d",
+		t.Year(),
+		t.Month(),
+		t.Day(),
+		t.Hour(),
+		t.Minute(),
+		t.Second(),
+	)
+}
+
+func unixtime(datetime string, timezone *time.Location) (int32, error) {
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", datetime, timezone)
+	if err != nil {
+		return 0, err
+	}
+
+	return int32(t.Unix()), nil
+}
+
 // UnmarshalGeoTag converts []string to GeoTag
-func UnmarshalGeoTag(data []string) (GeoTag, error) {
+func UnmarshalGeoTag(data []string, timezone *time.Location) (GeoTag, error) {
 	id, err := strconv.Atoi(data[0])
+	if err != nil {
+		return GeoTag{}, err
+	}
+
+	datetime, err := unixtime(data[1], timezone)
 	if err != nil {
 		return GeoTag{}, err
 	}
@@ -34,28 +64,13 @@ func UnmarshalGeoTag(data []string) (GeoTag, error) {
 
 	geotag := GeoTag{
 		ID:        id,
-		Time:      data[1],
+		Time:      datetime,
 		Latitude:  latitude,
 		Longitude: longitude,
 		URL:       data[4],
 	}
 
 	return geotag, nil
-}
-
-// UnmarshalGeoTags converts [][]string to []GeoTag by using UnmarshalGeoTag function
-func UnmarshalGeoTags(data [][]string) ([]GeoTag, error) {
-	var geotags []GeoTag
-
-	for i := 0; i < len(data); i++ {
-		geotag, err := UnmarshalGeoTag(data[i])
-		if err != nil {
-			return nil, err
-		}
-		geotags = append(geotags, geotag)
-	}
-
-	return geotags, nil
 }
 
 // ReadGeoTagsFromCSV marshal []GeoTag from CSV file corresponding the path
@@ -66,10 +81,15 @@ func ReadGeoTagsFromCSV(path string, capacity int, buffsize int) ([]GeoTag, erro
 	}
 	defer reader.Close()
 
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		return nil, err
+	}
+
 	geotags := make([]GeoTag, 0, capacity)
 
 	for record := range csvutil.AsyncReadCSV(reader, buffsize) {
-		geotag, err := UnmarshalGeoTag(record)
+		geotag, err := UnmarshalGeoTag(record, jst)
 		if err != nil {
 			return nil, err
 		}
