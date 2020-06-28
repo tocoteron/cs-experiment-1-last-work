@@ -88,13 +88,15 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	c.Logger().Error(err)
 }
 
-func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
+func startWebServer(isDebug bool, port string, tagSearchTable geotag.TagSearchTable) {
 	cache := ResponseCache{}
 
 	e := echo.New()
-
 	e.HideBanner = true
-	e.HTTPErrorHandler = customHTTPErrorHandler
+
+	if isDebug {
+		e.HTTPErrorHandler = customHTTPErrorHandler
+	}
 
 	renderer := &TemplateRenderer{
 		templates: template.Must(template.ParseGlob("view/*.html")),
@@ -154,5 +156,5 @@ func main() {
 		}()
 	}
 
-	startWebServer(*port, tagSearchTable)
+	startWebServer(*isDebug, *port, tagSearchTable)
 }
