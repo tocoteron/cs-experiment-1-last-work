@@ -88,7 +88,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	c.Logger().Error(err)
 }
 
-func startWebServer(isDebug bool, port string, tagSearchTable geotag.TagSearchTable) {
+func startWebServer(isDebug bool, port uint, tagSearchTable geotag.TagSearchTable) {
 	cache := ResponseCache{}
 
 	e := echo.New()
@@ -108,11 +108,11 @@ func startWebServer(isDebug bool, port string, tagSearchTable geotag.TagSearchTa
 		return renderWithCache(e, c, cache, tag, tagSearchTable)
 	})
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
 
 func main() {
-	port := flag.String("port", "8080", "Port number of web server")
+	port := flag.Uint("port", 8080, "Port number of web server")
 	isDebug := flag.Bool("debug", false, "Debug mode flag")
 	flag.Parse()
 
