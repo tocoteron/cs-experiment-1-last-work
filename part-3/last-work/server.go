@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"runtime"
 	"runtime/debug"
 	"text/template"
@@ -73,7 +75,7 @@ func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 
 	e.GET("/search", func(c echo.Context) error {
 		tag := c.QueryParam("tag")
-		geotags := searchGeoTagsByTag(tagSearchTable, tag)
+		geotags := tagSearchTable[tag]
 
 		return c.Render(http.StatusOK, "search.html", map[string]interface{}{
 			"geotags": geotags,
@@ -81,17 +83,6 @@ func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 	})
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
-}
-
-func searchGeoTagsByTag(tagSearchTable geotag.TagSearchTable, tag string) []geotag.GeoTag {
-	geotagPointers := tagSearchTable[tag]
-	geotags := make([]geotag.GeoTag, len(geotagPointers))
-
-	for i := 0; i < len(geotags); i++ {
-		geotags[i] = *geotagPointers[i]
-	}
-
-	return geotags
 }
 
 func main() {
@@ -125,6 +116,10 @@ func main() {
 
 	printMemory()
 	fmt.Println(len(tagSearchTable), "tags loaded")
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	startWebServer(*port, tagSearchTable)
 }
