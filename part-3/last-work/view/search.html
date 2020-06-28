@@ -1,20 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <title>ハイパフォーマンス実装の結果</title>
-    </head>
-    <body>
-        {{range $index, $geotag := index . "geotags"}}
-        <div class="geotag" id="{{$geotag.ID}}">
-            <img src="{{$geotag.URL}}">
-            <ul>
-                <li>ID: {{$geotag.ID}}</li>
-                <li>Time: {{$geotag.Datetime}}</li>
-                <li>Latitude: {{$geotag.Latitude}}</li>
-                <li>Longitude: {{$geotag.Longitude}}</li>
-                <li>URL: {{$geotag.URL}}</li>
-            </ul>
-        </div>
-        {{end}}
-    </body>
+<head><title>実装Aの結果</title></head>
+<body>
+{{- range $_, $geotag := index . "geotags" -}}
+{{$url := $geotag.URL}}
+<div><img src="{{$url}}"><ul><li>Time: {{$geotag.Datetime}}</li><li>Latitude: {{$geotag.Latitude}}</li><li>Longitude: {{$geotag.Longitude}}</li><li>URL: {{$url}}</li></ul></div>
+{{- end -}}
+</body>
 </html>
