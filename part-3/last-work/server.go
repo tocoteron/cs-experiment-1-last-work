@@ -86,7 +86,8 @@ func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 }
 
 func main() {
-	port := flag.String("port", "1323", "Port number of web server")
+	port := flag.String("port", "8080", "Port number of web server")
+	isDebug := flag.Bool("debug", false, "Debug mode flag")
 	flag.Parse()
 
 	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("data/minimum-geotag.csv", 10500000, 1000)
@@ -97,7 +98,10 @@ func main() {
 	runtime.GC()
 	debug.FreeOSMemory()
 
-	printMemory()
+	if *isDebug {
+		printMemory()
+	}
+
 	fmt.Println(len(geotags), "geotags loaded")
 
 	idSearchTable := geotag.IDSearchTable{}
@@ -114,12 +118,17 @@ func main() {
 	runtime.GC()
 	debug.FreeOSMemory()
 
-	printMemory()
+	if *isDebug {
+		printMemory()
+	}
+
 	fmt.Println(len(tagSearchTable), "tags loaded")
 
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+	if *isDebug {
+		go func() {
+			log.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
+	}
 
 	startWebServer(*port, tagSearchTable)
 }
