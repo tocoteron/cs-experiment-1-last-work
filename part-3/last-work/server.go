@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"cs-experiment-1/part-3/last-work/geotag"
 	"flag"
 	"fmt"
@@ -14,6 +15,9 @@ import (
 
 	"github.com/labstack/echo"
 )
+
+// ResponseCache is cache of http response data
+type ResponseCache map[string][]byte
 
 var mem runtime.MemStats
 
@@ -50,6 +54,28 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
+func renderWithCache(e *echo.Echo, c echo.Context, cache ResponseCache, tag string, tagSearchTable geotag.TagSearchTable) error {
+	response, isCaching := cache[tag]
+	if isCaching {
+		return c.HTMLBlob(http.StatusOK, response)
+	}
+
+	geotags := tagSearchTable[tag]
+	buf := new(bytes.Buffer)
+
+	err := e.Renderer.Render(buf, "search.html", map[string]interface{}{
+		"geotags": geotags,
+	}, c)
+
+	if err != nil {
+		return err
+	}
+
+	cache[tag] = buf.Bytes()
+
+	return c.HTMLBlob(http.StatusOK, buf.Bytes())
+}
+
 func customHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {
@@ -63,6 +89,8 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 }
 
 func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
+	cache := ResponseCache{}
+
 	e := echo.New()
 
 	e.HideBanner = true
@@ -75,11 +103,7 @@ func startWebServer(port string, tagSearchTable geotag.TagSearchTable) {
 
 	e.GET("/search", func(c echo.Context) error {
 		tag := c.QueryParam("tag")
-		geotags := tagSearchTable[tag]
-
-		return c.Render(http.StatusOK, "search.html", map[string]interface{}{
-			"geotags": geotags,
-		})
+		return renderWithCache(e, c, cache, tag, tagSearchTable)
 	})
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
