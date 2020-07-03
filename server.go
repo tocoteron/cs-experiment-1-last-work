@@ -12,7 +12,7 @@ import (
 	"runtime/debug"
 	"text/template"
 
-	"github.com/tokoroten-lab/cs-experiment-1/part-3/last-work/geotag"
+	"github.com/tokoroten-lab/cs-experiment-1-last-work/geotag"
 
 	"github.com/labstack/echo"
 )

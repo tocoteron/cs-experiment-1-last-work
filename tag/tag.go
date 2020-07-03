@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/tokoroten-lab/cs-experiment-1/part-3/last-work/csvutil"
+	"github.com/tokoroten-lab/cs-experiment-1-last-work/csvutil"
 )
 
 // Tag is correspondign the db table 'tag'
