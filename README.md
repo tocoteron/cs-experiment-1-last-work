@@ -25,6 +25,17 @@ cd $GOPATH/src # If it doesn't exist, you should make the directory
 go get github.com/tokoroten-lab/cs-experiment-1-last-work
 ```
 
+### Set up data
+
+Create `data` directory under the project.
+
+```sh
+cd $GOPATH/src/github.com/tokoroten-lab/cs-experiment-1-last-work
+mkdir data
+```
+
+Put `geotag.csv` and `tag.csv` into `data` directory.
+
 ## Usage
 
 Move to `$GOPATH/src/cs-experiment-1/part-3/last-work/`.
