@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><title>実装Aの結果</title></head>
+<body>
+{{- range $_, $geotag := index . "geotags" -}}
+<p>{{$geotag.ID}},{{$geotag.Datetime}},{{$geotag.Latitude}},{{$geotag.Longitude}},{{$geotag.URLFarmID}},{{$geotag.URLID1}},{{$geotag.URLID2}}</p>
+{{- end -}}
+<script>$=document,ps=$.querySelectorAll("p"),ps.forEach(l=>{s=l.textContent.split(","),l.remove(),url=`http://farm${s[4]}.static.flickr.com/${s[5]}/${s[0]}_${Number(s[6]).toString(16).padStart(10,"0")}.jpg`,d=$.createElement("div"),d.innerHTML=`<img src="${url}"><ul><li>ID: ${s[0]}</li><li>Time: ${s[1]}</li><li>Latitude: ${s[1]}</li><li>Longitude: ${s[2]}</li><li>URL: ${url}</li></ul>`,$.body.appendChild(d)});</script>
+</body>
+</html>

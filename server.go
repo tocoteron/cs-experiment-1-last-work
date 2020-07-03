@@ -64,7 +64,7 @@ func renderWithCache(e *echo.Echo, c echo.Context, cache ResponseCache, tag stri
 	geotags := tagSearchTable[tag]
 	buf := new(bytes.Buffer)
 
-	err := e.Renderer.Render(buf, "search.html", map[string]interface{}{
+	err := e.Renderer.Render(buf, "minimum-search.html", map[string]interface{}{
 		"geotags": geotags,
 	}, c)
 
