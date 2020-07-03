@@ -1,4 +1,4 @@
-module cs-experiment-1/part-3/last-work
+module github.com/tokoroten-lab/cs-experiment-1/part-3/last-work
 
 go 1.14
 

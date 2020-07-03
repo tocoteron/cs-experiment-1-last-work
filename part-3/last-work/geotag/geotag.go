@@ -1,12 +1,13 @@
 package geotag
 
 import (
-	"cs-experiment-1/part-3/last-work/csvutil"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/tokoroten-lab/cs-experiment-1/part-3/last-work/csvutil"
 )
 
 // GeoTag is corresponding the db table 'geotag'

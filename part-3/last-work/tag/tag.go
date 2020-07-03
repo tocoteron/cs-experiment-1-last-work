@@ -1,9 +1,10 @@
 package tag
 
 import (
-	"cs-experiment-1/part-3/last-work/csvutil"
 	"os"
 	"strconv"
+
+	"github.com/tokoroten-lab/cs-experiment-1/part-3/last-work/csvutil"
 )
 
 // Tag is correspondign the db table 'tag'
