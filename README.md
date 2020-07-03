@@ -22,7 +22,7 @@ If you don't set GOPATH, it is set to `$HOME/go`(Unix) or `%USERPROFILE%\go`(Win
 
 ```sh
 cd $GOPATH/src # If it doesn't exist, you should make the directory
-git clone https://github.com/tokoroten-lab/cs-experiment-1.git
+go get github.com/tokoroten-lab/cs-experiment-1-last-work
 ```
 
 ## Usage
