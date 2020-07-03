@@ -13,12 +13,12 @@ Ubuntu:
 sudo apt install golang
 ```
 
-### Setup GOPATH
+### Set up GOPATH
 
 Set your GOPATH environment.
 If you don't set GOPATH, it is set to `$HOME/go`(Unix) or `%USERPROFILE%\go`(Windows) automatically.
 
-### Setup program
+### Set up program
 
 ```sh
 cd $GOPATH/src # If it doesn't exist, you should make the directory
