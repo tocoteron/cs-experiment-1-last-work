@@ -31,13 +31,13 @@ func main() {
 		tagSearchTable[tag.Tag] = append(tagSearchTable[tag.Tag], idSearchTable[tag.ID])
 	}
 
-	for _, geotags := range tagSearchTable {
+	for tag, geotags := range tagSearchTable {
 		sort.Slice(geotags, func(i, j int) bool {
 			return geotags[i].Time > geotags[j].Time
 		})
 
 		if len(geotags) > 100 {
-			geotags = geotags[:100]
+			tagSearchTable[tag] = geotags[:100]
 		}
 	}
 
