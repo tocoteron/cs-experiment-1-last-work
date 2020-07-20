@@ -117,7 +117,7 @@ func main() {
 	isDebug := flag.Bool("debug", false, "Debug mode flag")
 	flag.Parse()
 
-	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("data/minimum-geotag.csv", 10500000, 1000)
+	geotags, err := geotag.ReadCompressedGeoTagsFromCSV("data/minimum-geotag.csv", 3620000, 1000)
 	if err != nil {
 		panic(err)
 	}
